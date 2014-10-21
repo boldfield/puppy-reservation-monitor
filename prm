@@ -23,6 +23,7 @@ if __name__ == '__main__':
     config = load_config(conf_file)
     sleep_time = int(config['monitor_interval'])
     # Turn this into a daemon...
+    monit.init_cache()
     while True:
         monit.monitor(config['monitor_pages'],
                       config['email']['smtp_host'],
