@@ -46,13 +46,18 @@ def load_previous(url):
 def load_current(url):
     opener = urllib2.build_opener()
     opener.addheaders = [('User-agent', 'Midnight Border Collies Puppy Reservation Monitor')]
-    response = opener.open(url)
+    try:
+        response = opener.open(url)
 
-    content = StringIO.StringIO()
-    parsed = lxml.html.parse(response)
-    parsed.getroot().make_links_absolute()
-    parsed.write(content)
-    return content.getvalue()
+        content = StringIO.StringIO()
+        parsed = lxml.html.parse(response)
+        parsed.getroot().make_links_absolute()
+        parsed.write(content)
+        content = content.getvalue()
+    except Exception, e:
+        logging.error("Unable to retrieve url: %s. %s" % (url, e))
+        content = None
+    return content
 
 
 def save_version(url, content):
@@ -68,6 +73,8 @@ def check_page(url):
     diff = None
     old_version = load_previous(url)
     new_version = load_current(url)
+    if new_version is None:
+        return None
 
     if old_version != new_version and not any([old_version is None, new_version is None]):
         diff = htmldiff(old_version, new_version)
